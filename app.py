@@ -1,13 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import io
-
-# ====================== THEME FOR CHARTS ======================
-plt.style.use("dark_background")
-sns.set_style("darkgrid", {"axes.facecolor": "#111"})
-
 
 # ====================== CYBERPUNK UI ======================
 cyberpunk_ui = """
@@ -75,7 +69,7 @@ st.markdown(cyberpunk_ui, unsafe_allow_html=True)
 
 
 # ====================== UI ======================
-st.title("📊 Advanced Data Visualizer ")
+st.title("📊 Advanced Data Visualizer")
 
 uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
@@ -100,12 +94,17 @@ if uploaded_file:
 
         if chart_type == "Line Chart":
             plt.plot(df[x_axis], df[y_axis])
+
         elif chart_type == "Bar Chart":
             plt.bar(df[x_axis], df[y_axis])
+
         elif chart_type == "Scatter Plot":
             plt.scatter(df[x_axis], df[y_axis])
+
         elif chart_type == "Pie Chart":
-            plt.pie(df[x_axis].value_counts(), labels=df[x_axis].unique(), autopct="%1.1f%%")
+            counts = df[x_axis].value_counts()
+            labels = counts.index
+            plt.pie(counts, labels=labels, autopct="%1.1f%%")
 
         st.pyplot(fig)
 
