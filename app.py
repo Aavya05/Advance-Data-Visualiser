@@ -1,45 +1,55 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
-st.title("📊 Advanced Data Visualizer")
+st.set_page_config(page_title="Advance Data Visualiser", layout="wide")
 
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+st.title("📊 Advance Data Visualiser")
 
-if uploaded_file:
+# Upload CSV
+uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+
+if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-
-    # 🔥 Important Fix
+    
+    # Make sure column names are strings
     df.columns = df.columns.astype(str)
 
-    st.subheader("📁 Uploaded Dataset Preview")
+    st.success("✅ File loaded successfully!")
+
+    st.subheader("📌 Dataset Preview")
     st.dataframe(df)
 
-    columns = df.columns.tolist()
+    # Select Columns
+    x_axis = st.selectbox("Select X axis column", df.columns)
+    y_axis = st.selectbox("Select Y axis column", df.columns)
 
-    st.subheader("📈 Choose Chart Type")
-    chart_type = st.selectbox("Select:", ["Line Chart", "Bar Chart", "Scatter Plot", "Pie Chart"])
+    # Select chart type
+    chart_type = st.selectbox("Select Chart Type", ["Line", "Bar", "Scatter", "Histogram"])
 
-    x_axis = st.selectbox("X-axis:", columns)
-    y_axis = None
+    # Plotting
+    if st.button("Generate Graph"):
+        if x_axis and y_axis:
+            try:
+                if chart_type == "Line":
+                    fig = px.line(df, x=x_axis, y=y_axis)
 
-    if chart_type != "Pie Chart":
-        y_axis = st.selectbox("Y-axis:", columns)
+                elif chart_type == "Bar":
+                    fig = px.bar(df, x=x_axis, y=y_axis)
 
-    if st.button("Generate Chart"):
-        fig = plt.figure(figsize=(6, 4))
+                elif chart_type == "Scatter":
+                    fig = px.scatter(df, x=x_axis, y=y_axis)
 
-        if chart_type == "Line Chart":
-            plt.plot(df[x_axis], df[y_axis])
-        elif chart_type == "Bar Chart":
-            plt.bar(df[x_axis], df[y_axis])
-        elif chart_type == "Scatter Plot":
-            plt.scatter(df[x_axis], df[y_axis])
-        elif chart_type == "Pie Chart":
-            counts = df[x_axis].value_counts()
-            plt.pie(counts, labels=counts.index, autopct="%1.1f%%")
+                elif chart_type == "Histogram":
+                    fig = px.histogram(df, x=x_axis)
 
-        st.pyplot(fig)
+                st.subheader("📈 Generated Chart")
+                st.plotly_chart(fig, use_container_width=True)
+
+            except Exception as e:
+                st.error(f"❌ Error generating chart:\n{e}")
+        else:
+            st.warning("⚠️ Please select both X and Y axis columns.")
 
 else:
-    st.info("Please upload a CSV file to begin.")
+    st.info("👆 Please upload a CSV file to begin visualization.")
