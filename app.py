@@ -1,85 +1,113 @@
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
 
-# ================= CSS THEME ==================
-neon_css = """
+# ====================== THEME FOR CHARTS ======================
+plt.style.use("dark_background")
+sns.set_style("darkgrid", {"axes.facecolor": "#111"})
+
+
+# ====================== CYBERPUNK UI ======================
+cyberpunk_ui = """
 <style>
-
-/* FULL BLACK BACKGROUND */
+/* Main app background */
 .stApp {
-    background-color: #000000 !important;
+    background-color: #000000;
+    color: #00eaff;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-/* Remove default padding */
-.block-container {
-    padding-top: 2rem;
+/* Title glow */
+h1, h2, h3 {
+    color: #00eaff !important;
+    text-shadow: 0 0 15px #00eaff;
 }
 
-/* Neon Title */
-.neon-title {
-    color: #0affff;
-    text-align: center;
-    font-size: 42px;
-    font-weight: bold;
-    text-shadow:
-        0 0 5px #0affff,
-        0 0 10px #0affff,
-        0 0 20px #0affff,
-        0 0 40px #0affff;
+/* Dataframe background */
+.dataframe {
+    background: #111;
+    color: #00eaff;
+    border-radius: 8px;
 }
 
-/* Neon subtitle */
-.neon-sub {
-    color: #ff00e1;
-    text-align: center;
-    font-size: 22px;
-    text-shadow:
-        0 0 5px #ff00e1,
-        0 0 15px #ff00e1,
-        0 0 25px #ff00e1;
+/* Sidebar */
+.css-1d391kg {
+    background: rgba(0, 0, 0, 0.7) !important;
 }
 
-/* Labels neon */
-label, .stTextInput label {
-    color: #00ff9d !important;
-    font-weight: 600;
-    text-shadow:
-        0 0 5px #00ff9d,
-        0 0 10px #00ff9d;
-}
-
-/* Button styling */
+/* Buttons */
 .stButton>button {
-    background-color: #111111;
-    color: #00ffff;
-    border: 2px solid #00ffff;
+    background: linear-gradient(90deg, #ff00ff, #00eaff);
+    color: white;
+    border: none;
     border-radius: 8px;
     padding: 8px 20px;
     font-weight: bold;
-    box-shadow:
-        0 0 10px #00ffff,
-        inset 0 0 10px #00ffff;
-}
-.stButton>button:hover {
-    cursor: pointer;
-    box-shadow:
-        0 0 20px #00ffff,
-        inset 0 0 20px #00ffff;
+    box-shadow: 0 0 15px #00eaff;
 }
 
+.stButton>button:hover {
+    box-shadow: 0 0 25px #ff00ff;
+    transform: scale(1.05);
+    transition: 0.2s;
+}
+
+/* Inputs */
+textarea, input {
+    background: #111 !important;
+    color: #00eaff !important;
+    border: 1px solid #00eaff !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: #00eaff;
+    border-radius: 10px;
+}
 </style>
 """
+st.markdown(cyberpunk_ui, unsafe_allow_html=True)
 
-# Apply CSS
-st.markdown(neon_css, unsafe_allow_html=True)
 
-# ================= UI CONTENT ==================
-st.markdown("<h1 class='neon-title'>Mind Guard AI</h1>", unsafe_allow_html=True)
-st.markdown("<p class='neon-sub'>Submit feedback below</p>", unsafe_allow_html=True)
+# ====================== UI ======================
+st.title("📊 Advanced Data Visualizer")
 
-feedback = st.text_area("Enter your Feedback")
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
-if st.button("Submit"):
-    if feedback.strip() == "":
-        st.warning("Please enter something...")
-    else:
-        st.success("✅ Feedback submitted successfully!")
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    st.subheader("📁 Uploaded Dataset Preview")
+    st.dataframe(df)
+
+    columns = df.columns.tolist()
+
+    st.subheader("📈 Choose Chart Type")
+    chart_type = st.selectbox("Select:", ["Line Chart", "Bar Chart", "Scatter Plot", "Pie Chart"])
+
+    x_axis = st.selectbox("X-axis:", columns)
+    y_axis = None
+
+    if chart_type != "Pie Chart":
+        y_axis = st.selectbox("Y-axis:", columns)
+
+    if st.button("Generate Chart"):
+        fig = plt.figure(figsize=(6, 4))
+
+        if chart_type == "Line Chart":
+            plt.plot(df[x_axis], df[y_axis])
+        elif chart_type == "Bar Chart":
+            plt.bar(df[x_axis], df[y_axis])
+        elif chart_type == "Scatter Plot":
+            plt.scatter(df[x_axis], df[y_axis])
+        elif chart_type == "Pie Chart":
+            plt.pie(df[x_axis].value_counts(), labels=df[x_axis].unique(), autopct="%1.1f%%")
+
+        st.pyplot(fig)
+
+else:
+    st.info("Please upload a CSV file to begin.")
