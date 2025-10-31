@@ -1,55 +1,85 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 
-st.set_page_config(page_title="Advance Data Visualiser", layout="wide")
+# ================= CSS THEME ==================
+neon_css = """
+<style>
 
-st.title("📊 Advance Data Visualiser")
+/* FULL BLACK BACKGROUND */
+.stApp {
+    background-color: #000000 !important;
+}
 
-# Upload CSV
-uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+/* Remove default padding */
+.block-container {
+    padding-top: 2rem;
+}
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    
-    # Make sure column names are strings
-    df.columns = df.columns.astype(str)
+/* Neon Title */
+.neon-title {
+    color: #0affff;
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
+    text-shadow:
+        0 0 5px #0affff,
+        0 0 10px #0affff,
+        0 0 20px #0affff,
+        0 0 40px #0affff;
+}
 
-    st.success("✅ File loaded successfully!")
+/* Neon subtitle */
+.neon-sub {
+    color: #ff00e1;
+    text-align: center;
+    font-size: 22px;
+    text-shadow:
+        0 0 5px #ff00e1,
+        0 0 15px #ff00e1,
+        0 0 25px #ff00e1;
+}
 
-    st.subheader("📌 Dataset Preview")
-    st.dataframe(df)
+/* Labels neon */
+label, .stTextInput label {
+    color: #00ff9d !important;
+    font-weight: 600;
+    text-shadow:
+        0 0 5px #00ff9d,
+        0 0 10px #00ff9d;
+}
 
-    # Select Columns
-    x_axis = st.selectbox("Select X axis column", df.columns)
-    y_axis = st.selectbox("Select Y axis column", df.columns)
+/* Button styling */
+.stButton>button {
+    background-color: #111111;
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: bold;
+    box-shadow:
+        0 0 10px #00ffff,
+        inset 0 0 10px #00ffff;
+}
+.stButton>button:hover {
+    cursor: pointer;
+    box-shadow:
+        0 0 20px #00ffff,
+        inset 0 0 20px #00ffff;
+}
 
-    # Select chart type
-    chart_type = st.selectbox("Select Chart Type", ["Line", "Bar", "Scatter", "Histogram"])
+</style>
+"""
 
-    # Plotting
-    if st.button("Generate Graph"):
-        if x_axis and y_axis:
-            try:
-                if chart_type == "Line":
-                    fig = px.line(df, x=x_axis, y=y_axis)
+# Apply CSS
+st.markdown(neon_css, unsafe_allow_html=True)
 
-                elif chart_type == "Bar":
-                    fig = px.bar(df, x=x_axis, y=y_axis)
+# ================= UI CONTENT ==================
+st.markdown("<h1 class='neon-title'>Mind Guard AI</h1>", unsafe_allow_html=True)
+st.markdown("<p class='neon-sub'>Submit feedback below</p>", unsafe_allow_html=True)
 
-                elif chart_type == "Scatter":
-                    fig = px.scatter(df, x=x_axis, y=y_axis)
+feedback = st.text_area("Enter your Feedback")
 
-                elif chart_type == "Histogram":
-                    fig = px.histogram(df, x=x_axis)
-
-                st.subheader("📈 Generated Chart")
-                st.plotly_chart(fig, use_container_width=True)
-
-            except Exception as e:
-                st.error(f"❌ Error generating chart:\n{e}")
-        else:
-            st.warning("⚠️ Please select both X and Y axis columns.")
-
-else:
-    st.info("👆 Please upload a CSV file to begin visualization.")
+if st.button("Submit"):
+    if feedback.strip() == "":
+        st.warning("Please enter something...")
+    else:
+        st.success("✅ Feedback submitted successfully!")
